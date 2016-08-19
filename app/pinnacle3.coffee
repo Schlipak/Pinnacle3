@@ -127,7 +127,7 @@ module.exports = class Pinnacle3
 
 			coords = {
 				x: _this.radius * Math.sin(angles.phi) * Math.cos(angles.theta),
-				y: _this.radius * Math.cos(angles.phi),
+				y: _this.radius * -Math.cos(angles.phi),
 				z: _this.radius * Math.sin(angles.phi) * Math.sin(angles.theta)
 			}
 
