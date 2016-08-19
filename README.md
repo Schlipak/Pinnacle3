@@ -10,6 +10,8 @@
 
 THREE.js Audio Vizualizer
 
+[DEMO](https://schlipak.github.io/Pinnacle3/)
+
 ___
 
 This is HTML5 application, built with [Brunch](http://brunch.io).
