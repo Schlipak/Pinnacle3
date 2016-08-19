@@ -30,6 +30,3 @@ public/
 
 # Bower stuff.
 bower_components/
-
-# Project specific
-*.mp3
