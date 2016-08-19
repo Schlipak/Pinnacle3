@@ -137,19 +137,30 @@ module.exports = class Pinnacle3
 			_this.camera.lookAt _this.scene.position
 		)
 
+	freeze: () ->
+		@pause()
+		if _frame != -1
+			cancelAnimationFrame _frame
+			_frame = -1
+
+	thaw: () ->
+		if _frame == -1
+			_frame = requestAnimationFrame(@animate.bind(this))
+
 	play: () ->
 		@audio.play()
 		@paused = false
 		@target.classList.add 'playing'
-		_frame = requestAnimationFrame(@animate.bind(this))
+		@thaw()
+
+	stop: () ->
+		@pause()
+		@audio.currentTime = 0
 
 	pause: () ->
 		@audio.pause()
 		@paused = true
 		@target.classList.remove 'playing'
-		if _frame != -1
-			cancelAnimationFrame _frame
-			_frame = -1
 
 	toggle: () ->
 		if @paused
