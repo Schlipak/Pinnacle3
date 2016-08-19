@@ -7,7 +7,7 @@
 Bar     = require 'srcs/bar'
 
 module.exports = class Pinnacle3
-	_animation_frame_id_ = -1
+	_frame = -1
 
 	constructor: (@target, @params) ->
 		@width = window.innerWidth
@@ -43,34 +43,37 @@ module.exports = class Pinnacle3
 			@bars.push new Bar(@scene, i, @params)
 		light = new THREE.AmbientLight(0xFFFFFF)
 		@scene.add light
-		@setupParticles()
+		if @params.particles then @setupParticles()
 		@setupComposer()
 		if @params.mouse then @initMouse()
 
 	setupParticles: () ->
-		@particles = new THREE.Geometry()
-		loader = new THREE.TextureLoader()
-		col = tinycolor('hsl(0, 100%, 50%)').toHsl()
-		col.h = @hue
-		mat = new THREE.PointsMaterial({
-			color: new THREE.Color(tinycolor(col).toRgbString()),
-			size: 8,
-			map: loader.load('img/spark.png'),
-			blending: THREE.AdditiveBlending,
-			transparent: true
-		})
-		mat.alphaTest = 0.1
-		for i in [1..500] by 1
-			coords = {
-				x: Math.random() * (@radius * 2) - @radius,
-				y: Math.random() * (@radius * 2) - @radius
-				z: Math.random() * (@radius * 2) - @radius,
-			}
-			particle = new THREE.Vector3(coords.x, coords.y, coords.z)
-			particle.velocity = new THREE.Vector3(0, -Math.random(), 0)
-			@particles.vertices.push(particle)
-		@particleSystem = new THREE.Points(@particles, mat)
-		@scene.add @particleSystem
+		@particleSystems = []
+		for i in [1..2] by 1
+			particles = new THREE.Geometry()
+			loader = new THREE.TextureLoader()
+			col = tinycolor('hsl(0, 100%, 50%)').toHsl()
+			col.h = @hue
+			mat = new THREE.PointsMaterial({
+				color: new THREE.Color(tinycolor(col).toRgbString()),
+				size: 8,
+				map: loader.load('img/spark.png'),
+				blending: THREE.AdditiveBlending,
+				transparent: true
+			})
+			mat.alphaTest = 0.1
+			for i in [1..250] by 1
+				coords = {
+					x: Math.random() * (@radius * 2) - @radius,
+					y: Math.random() * (@radius * 2) - @radius
+					z: Math.random() * (@radius * 2) - @radius,
+				}
+				particle = new THREE.Vector3(coords.x, coords.y, coords.z)
+				particle.velocity = new THREE.Vector3(0, -Math.random(), 0)
+				particles.vertices.push(particle)
+			system = new THREE.Points(particles, mat)
+			@particleSystems.push(system)
+			@scene.add system
 
 	setupComposer: () ->
 		@composer = new THREE.EffectComposer(@renderer)
@@ -138,15 +141,15 @@ module.exports = class Pinnacle3
 		@audio.play()
 		@paused = false
 		@target.classList.add 'playing'
-		_animation_frame_id_ = requestAnimationFrame(@animate.bind(this))
+		_frame = requestAnimationFrame(@animate.bind(this))
 
 	pause: () ->
 		@audio.pause()
 		@paused = true
 		@target.classList.remove 'playing'
-		if _animation_frame_id_ != -1
-			cancelAnimationFrame _animation_frame_id_
-			_animation_frame_id_ = -1
+		if _frame != -1
+			cancelAnimationFrame _frame
+			_frame = -1
 
 	toggle: () ->
 		if @paused
@@ -160,6 +163,16 @@ module.exports = class Pinnacle3
 			sum += val
 		return (sum / array.length);
 
+	updateParticles: () ->
+		avg = @average(@audioData)
+		col = Bar.computeColor(avg, @hue, @range, @lightOffset + 20)
+		rotation = .0003 + ((Math.pow(avg, 4) / Math.pow(255, 4)) / 10)
+		@particleSystems[0].rotation.y += rotation
+		@particleSystems[1].rotation.y -= rotation
+		for system in @particleSystems
+			system.material.size = 4 + ((Math.pow(avg, 4) / Math.pow(255, 3)))
+			system.material.color = col
+
 	animate: () ->
 		@analyser.getByteFrequencyData(@audioData)
 		middle = ~~(@bars.length / 2) + 1
@@ -172,13 +185,11 @@ module.exports = class Pinnacle3
 				idx = i - middle + 1
 			freqs = @audioData.slice(chunkSize * idx, chunkSize * (idx + 1))
 			avg = @average(freqs)
-			bar.setHeight(avg)
+			bar.update(avg, @hue, @range, @lightOffset)
 			i += 1
-		avg = @average(@audioData)
-		col = Bar.computeColor(avg, @hue, @range, @lightOffset + 20)
-		@particleSystem.rotation.y += .0003 + ((Math.pow(avg, 4) / Math.pow(255, 4)) / 10)
-		@particleSystem.material.size = 4 + ((Math.pow(avg, 4) / Math.pow(255, 3)))
-		@particleSystem.material.color = col
+		if @params.particles then @updateParticles()
 		@renderer.clear()
 		@composer.render()
-		_animation_frame_id_ = requestAnimationFrame(@animate.bind(this))
+		if (@params.color and @params.color.cycle) and (_frame % 15 == 0)
+			@hue = (@hue + 1) % 360
+		_frame = requestAnimationFrame(@animate.bind(this))

@@ -15,18 +15,15 @@ module.exports = class Bar
     col.l = light
     return new THREE.Color(tinycolor(col).toHslString())
 
-  constructor: (scene, @index, @params) ->
+  constructor: (scene, @index) ->
     @material = new THREE.MeshLambertMaterial(color: 0xFFFFFF)
     @mesh = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), @material)
     @mesh.position.set(((@index - 50) * 4), 0, 0)
-    @hue = ((@params.color && @params.color.hue) || 0)
-    @range = ((@params.color && @params.color.range) || 45)
-    @lightOffset = ((@params.color && @params.color.lightOffset) || 5)
     scene.add(@mesh)
 
-  setHeight: (height) ->
+  update: (height, hue, range, lightOffset) ->
     scale = Math.abs(height) / 10.0
     if scale < 0.1 then scale = 0.01
     @mesh.scale.y = scale
     @mesh.scale.z = scale
-    @mesh.material.color = Bar.computeColor(height, @hue, @range, @lightOffset)
+    @mesh.material.color = Bar.computeColor(height, hue, range, lightOffset)
