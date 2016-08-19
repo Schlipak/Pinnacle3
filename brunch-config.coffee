@@ -20,8 +20,8 @@
 module.exports =
   files:
     javascripts:
-      joinTo: 'js/pinnacle3.js'
+      joinTo: 'js/pinnacle3.min.js'
     stylesheets:
-      joinTo: 'css/app.css'
+      joinTo: 'css/app.min.css'
     templates:
       joinTo: 'js/app.js'
