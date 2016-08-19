@@ -2,7 +2,7 @@
 # @Date:   18-Aug-2016
 # @Email:  g.de.matos@free.fr
 # @Last modified by:   schlipak
-# @Last modified time: 19-Aug-2016
+# @Last modified time: 20-Aug-2016
 
 Bar     = require 'srcs/bar'
 
@@ -49,7 +49,7 @@ module.exports = class Pinnacle3
 
 	setupParticles: () ->
 		@particleSystems = []
-		for i in [1..2] by 1
+		for i in [1..4] by 1
 			particles = new THREE.Geometry()
 			loader = new THREE.TextureLoader()
 			col = tinycolor('hsl(0, 100%, 50%)').toHsl()
@@ -62,7 +62,7 @@ module.exports = class Pinnacle3
 				transparent: true
 			})
 			mat.alphaTest = 0.1
-			for i in [1..250] by 1
+			for i in [1..125] by 1
 				coords = {
 					x: Math.random() * (@radius * 2) - @radius,
 					y: Math.random() * (@radius * 2) - @radius
@@ -168,7 +168,9 @@ module.exports = class Pinnacle3
 		col = Bar.computeColor(avg, @hue, @range, @lightOffset + 20)
 		rotation = .0003 + ((Math.pow(avg, 4) / Math.pow(255, 4)) / 10)
 		@particleSystems[0].rotation.y += rotation
-		@particleSystems[1].rotation.y -= rotation
+		@particleSystems[1].rotation.y += rotation / 2
+		@particleSystems[2].rotation.y -= rotation / 2
+		@particleSystems[3].rotation.y += rotation
 		for system in @particleSystems
 			system.material.size = 4 + ((Math.pow(avg, 4) / Math.pow(255, 3)))
 			system.material.color = col
