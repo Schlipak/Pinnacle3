@@ -1,0 +1,77 @@
+<!--
+@Author: Guillaume de Matos <schlipak>
+@Date:   18-Aug-2016
+@Email:  g.de.matos@free.fr
+@Last modified by:   schlipak
+@Last modified time: 19-Aug-2016
+-->
+
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+  <title>Pinnacle3</title>
+  <link rel="stylesheet" href="./css/app.css" media="screen" charset="utf-8">
+</head>
+<body>
+  <div id='container'>
+    <a href='https://soundcloud.com/carpenter_brut' target='_blank'>
+      <img src='img/carpenter.png'>
+    </a>
+  </div>
+
+  <!-- THREE -->
+  <script type="text/javascript" src="vendor/three.js"></script>
+  <!-- SHADERS -->
+  <script type="text/javascript" src="vendor/CopyShader.js"></script>
+  <script type="text/javascript" src="vendor/RGBShiftShader.js"></script>
+  <script type="text/javascript" src="vendor/ConvolutionShader.js"></script>
+  <script type="text/javascript" src="vendor/LuminosityHighPassShader.js"></script>
+  <script type="text/javascript" src="vendor/VignetteShader.js"></script>
+  <!-- COMPOSER -->
+  <script type="text/javascript" src="vendor/EffectComposer.js"></script>
+  <!-- PASSES -->
+  <script type="text/javascript" src="vendor/RenderPass.js"></script>
+  <script type="text/javascript" src="vendor/MaskPass.js"></script>
+  <script type="text/javascript" src="vendor/ShaderPass.js"></script>
+  <script type="text/javascript" src="vendor/BloomPass.js"></script>
+  <script type="text/javascript" src="vendor/UnrealBloomPass.js"></script>
+  <!-- OTHERS -->
+  <script type="text/javascript" src="vendor/tinycolor.min.js"></script>
+  <!-- MAIN -->
+  <script type="text/javascript" src="js/pinnacle3.js"></script>
+  <script type="text/javascript">
+    (function() {
+      var Pinnacle3 = require('pinnacle3');
+
+      var container = document.getElementById('container');
+      p = new Pinnacle3(container, {
+        color: {
+          hue: 330,
+          range: 80,
+          lightOffset: 10
+        },
+        shaders: {
+          shift: true,
+          bloom: true,
+          unreal: true,
+          vignette: true
+        },
+        mouse: false
+      });
+
+      // This file is a 128kbps file ripped off of SoundCloud.
+      // So a shitty quality, needless to say.
+      // Check out the artist's page if you like it!
+      p.run('music/tracy.mp3')
+
+      window.addEventListener('keydown', function(e) {
+        if (e.keyCode == 80) {
+          p.toggle();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
