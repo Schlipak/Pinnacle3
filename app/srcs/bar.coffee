@@ -2,7 +2,7 @@
 # @Date:   18-Aug-2016
 # @Email:  g.de.matos@free.fr
 # @Last modified by:   schlipak
-# @Last modified time: 19-Aug-2016
+# @Last modified time: 20-Aug-2016
 
 module.exports = class Bar
   @computeColor: (value, hue, range, lightOffset) ->
@@ -23,7 +23,7 @@ module.exports = class Bar
 
   update: (height, hue, range, lightOffset) ->
     scale = Math.abs(height) / 10.0
-    if scale < 0.1 then scale = 0.01
+    if scale < 0.1 then scale = 0.0001
     @mesh.scale.y = scale
     @mesh.scale.z = scale
     @mesh.material.color = Bar.computeColor(height, hue, range, lightOffset)
