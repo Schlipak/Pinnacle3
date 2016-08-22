@@ -30,3 +30,7 @@ public/
 
 # Bower stuff.
 bower_components/
+
+# Branch specific
+*.mp3
+!tracy.mp3

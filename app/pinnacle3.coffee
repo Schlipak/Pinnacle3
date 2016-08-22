@@ -2,7 +2,7 @@
 # @Date:   18-Aug-2016
 # @Email:  g.de.matos@free.fr
 # @Last modified by:   schlipak
-# @Last modified time: 20-Aug-2016
+# @Last modified time: 22-Aug-2016
 
 Bar     = require 'srcs/bar'
 
@@ -43,13 +43,17 @@ module.exports = class Pinnacle3
 			@bars.push new Bar(@scene, i, @params)
 		light = new THREE.AmbientLight(0xFFFFFF)
 		@scene.add light
-		if @params.particles then @setupParticles()
+		if (@params.particles and @params.particles.active)
+			@setupParticles(
+				(@params.particles.count || 500),
+				(@params.particles.groups || 10)
+			)
 		@setupComposer()
 		if @params.mouse then @initMouse()
 
-	setupParticles: () ->
+	setupParticles: (count, groups) ->
 		@particleSystems = []
-		for i in [1..4] by 1
+		for i in [1..groups] by 1
 			particles = new THREE.Geometry()
 			loader = new THREE.TextureLoader()
 			col = tinycolor('hsl(0, 100%, 50%)').toHsl()
@@ -61,17 +65,22 @@ module.exports = class Pinnacle3
 				blending: THREE.AdditiveBlending,
 				transparent: true
 			})
-			mat.alphaTest = 0.1
-			for i in [1..125] by 1
+			mat.alphaTest = 0.15
+			for i in [1..(count / groups)] by 1
 				coords = {
 					x: Math.random() * (@radius * 2) - @radius,
 					y: Math.random() * (@radius * 2) - @radius
 					z: Math.random() * (@radius * 2) - @radius,
 				}
 				particle = new THREE.Vector3(coords.x, coords.y, coords.z)
-				particle.velocity = new THREE.Vector3(0, -Math.random(), 0)
 				particles.vertices.push(particle)
 			system = new THREE.Points(particles, mat)
+			system.velocity = new THREE.Vector3(
+				(2 * Math.random()) - 1,
+				(2 * Math.random()) - 1,
+				(2 * Math.random()) - 1
+			)
+			system.hueOffset = (Math.random() * 50) - 25
 			@particleSystems.push(system)
 			@scene.add system
 
@@ -176,13 +185,16 @@ module.exports = class Pinnacle3
 
 	updateParticles: () ->
 		avg = @average(@audioData)
-		col = Bar.computeColor(avg, @hue, @range, @lightOffset + 20)
 		rotation = .0003 + ((Math.pow(avg, 4) / Math.pow(255, 4)) / 10)
-		@particleSystems[0].rotation.y += rotation
-		@particleSystems[1].rotation.y += rotation / 2
-		@particleSystems[2].rotation.y -= rotation / 2
-		@particleSystems[3].rotation.y += rotation
 		for system in @particleSystems
+			col = Bar.computeColor(
+				avg,
+				(@hue + system.hueOffset) % 360,
+				@range, @lightOffset + 20
+			)
+			system.rotation.x += rotation * system.velocity.x
+			system.rotation.y += rotation * system.velocity.y
+			system.rotation.z += rotation * system.velocity.z
 			system.material.size = 4 + ((Math.pow(avg, 4) / Math.pow(255, 3)))
 			system.material.color = col
 
@@ -200,7 +212,8 @@ module.exports = class Pinnacle3
 			avg = @average(freqs)
 			bar.update(avg, @hue, @range, @lightOffset)
 			i += 1
-		if @params.particles then @updateParticles()
+		if (@params.particles and @params.particles.active)
+			@updateParticles()
 		@renderer.clear()
 		@composer.render()
 		if (@params.color and @params.color.cycle) and (_frame % 15 == 0)

@@ -2,7 +2,7 @@
 # @Date:   18-Aug-2016
 # @Email:  g.de.matos@free.fr
 # @Last modified by:   schlipak
-# @Last modified time: 20-Aug-2016
+# @Last modified time: 22-Aug-2016
 
 module.exports = class Bar
   @computeColor: (value, hue, range, lightOffset) ->
