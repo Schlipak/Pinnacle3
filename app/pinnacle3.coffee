@@ -2,7 +2,7 @@
 # @Date:   18-Aug-2016
 # @Email:  g.de.matos@free.fr
 # @Last modified by:   schlipak
-# @Last modified time: 22-Aug-2016
+# @Last modified time: 01-Sep-2016
 
 Bar     = require 'srcs/bar'
 
@@ -19,6 +19,8 @@ module.exports = class Pinnacle3
 		@hue = ((@params.color && @params.color.hue) || 0)
 		@range = ((@params.color && @params.color.range) || 180)
 		@lightOffset = ((@params.color && @params.color.lightOffset) || 10)
+		@autoplay = ((@params.autoplay) || false)
+		@fxaa = null
 		@initScene()
 
 	initScene: () ->
@@ -102,18 +104,23 @@ module.exports = class Pinnacle3
 			effect.uniforms["offset"].value = 1
 			effect.uniforms["darkness"].value = 1.2
 			@composer.addPass(effect)
+		if not @params.shaders or (@params.shaders and @params.shaders.fxaa)
+			@fxaa = new THREE.ShaderPass(THREE.FXAAShader)
+			@fxaa.uniforms['resolution'].value = new THREE.Vector2(1 / @width, 1 / @height)
+			@composer.addPass(@fxaa)
 		effect = new THREE.ShaderPass(THREE.CopyShader)
 		effect.renderToScreen = true
 		@composer.addPass(effect)
-		_this = @
-		window.addEventListener('resize', () ->
-			_this.width = window.innerWidth
-			_this.height = window.innerHeight
-			_this.camera.aspect = _this.width / _this.height
-			_this.camera.updateProjectionMatrix()
-			_this.renderer.setSize _this.width, _this.height
-			_this.composer.setSize _this.width, _this.height
-		)
+		window.addEventListener('resize', (() ->
+			@.width = window.innerWidth
+			@.height = window.innerHeight
+			@.camera.aspect = @.width / @.height
+			@.camera.updateProjectionMatrix()
+			@.renderer.setSize @.width, @.height
+			@.composer.setSize @.width, @.height
+			if @.fxaa
+				@fxaa.uniforms['resolution'].value = new THREE.Vector2(1 / @width, 1 / @height)
+		).bind(@))
 
 	run: (url) ->
 		@audio = new Audio(url)
@@ -124,7 +131,8 @@ module.exports = class Pinnacle3
 		@audioSrc.connect(@analyser)
 		@audioSrc.connect(@audioCtx.destination)
 		@audioData = new Uint8Array(@analyser.frequencyBinCount)
-		@play()
+		@thaw()
+		@play() if @autoplay
 
 	initMouse: () ->
 		_this = @

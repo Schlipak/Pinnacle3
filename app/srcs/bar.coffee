@@ -2,13 +2,18 @@
 # @Date:   18-Aug-2016
 # @Email:  g.de.matos@free.fr
 # @Last modified by:   schlipak
-# @Last modified time: 22-Aug-2016
+# @Last modified time: 01-Sep-2016
 
 module.exports = class Bar
   @computeColor: (value, hue, range, lightOffset) ->
     col = tinycolor('hsl(0, 100%, 50%)').toHsl()
     col.h = (hue + (range * (value / 255))) % 360
-    light = Math.min(((value / 255) * 100) + lightOffset, 100)
+    light = Math.max(
+      Math.min(
+        ((value / 255) * 100) + lightOffset,
+        100
+      ), 0
+    )
     # God dammit TinyColor!
     if light < 1 then light += 1.0
     if light == 1 then light = 1.1
