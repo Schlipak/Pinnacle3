@@ -5,8 +5,8 @@
 # @Last modified time: 01-Sep-2016
 
 module.exports = class Bar
-  @computeColor: (value, hue, range, lightOffset) ->
-    col = tinycolor('hsl(0, 100%, 50%)').toHsl()
+  @computeColor: (value, hue, range, saturation, lightOffset) ->
+    col = tinycolor('hsl(0, ' + saturation + '%, 50%)').toHsl()
     col.h = (hue + (range * (value / 255))) % 360
     light = Math.max(
       Math.min(
@@ -20,7 +20,7 @@ module.exports = class Bar
     col.l = light
     return new THREE.Color(tinycolor(col).toHslString())
 
-  constructor: (scene, @index) ->
+  constructor: (scene, @index, @params, @saturation) ->
     @material = new THREE.MeshLambertMaterial(color: 0xFFFFFF)
     @mesh = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), @material)
     @mesh.position.set(((@index - 50) * 4), 0, 0)
@@ -31,4 +31,4 @@ module.exports = class Bar
     if scale < 0.1 then scale = 0.0001
     @mesh.scale.y = scale
     @mesh.scale.z = scale
-    @mesh.material.color = Bar.computeColor(height, hue, range, lightOffset)
+    @mesh.material.color = Bar.computeColor(height, hue, range, @saturation, lightOffset)

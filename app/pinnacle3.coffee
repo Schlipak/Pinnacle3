@@ -18,6 +18,7 @@ module.exports = class Pinnacle3
 		@paused = true
 		@hue = ((@params.color && @params.color.hue) || 0)
 		@range = ((@params.color && @params.color.range) || 180)
+		@saturation = ((@params.color && @params.color.saturation) || 100)
 		@lightOffset = ((@params.color && @params.color.lightOffset) || 10)
 		@autoplay = ((@params.autoplay) || false)
 		@fxaa = null
@@ -42,7 +43,7 @@ module.exports = class Pinnacle3
 		@renderer.setSize @width, @height
 		@target.appendChild @renderer.domElement
 		for i in [1..99] by 1
-			@bars.push new Bar(@scene, i, @params)
+			@bars.push new Bar(@scene, i, @params, @saturation)
 		light = new THREE.AmbientLight(0xFFFFFF)
 		@scene.add light
 		if (@params.particles and @params.particles.active)
@@ -198,7 +199,9 @@ module.exports = class Pinnacle3
 			col = Bar.computeColor(
 				avg,
 				(@hue + system.hueOffset) % 360,
-				@range, @lightOffset + 20
+				@range,
+				100,
+				@lightOffset + 20
 			)
 			system.rotation.x += rotation * system.velocity.x
 			system.rotation.y += rotation * system.velocity.y
